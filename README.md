@@ -1,5 +1,5 @@
 # ChatWave
-<a href="">ChatWave_Documentation</a>
+<a href="https://docs.google.com/document/d/12eQAShnzGsEA-_MTSWcu5wNshp-aJFPU5UDMr4no6GY/edit?usp=sharing">ChatWave Project Documentation</a>
 
 <a href="https://docs.google.com/spreadsheets/d/1MTuRI-Py3J7W9HzZymM83rH1Y-irbN5IFsV4MpOo8UU/edit#gid=0">Product Backlog</a>
 
