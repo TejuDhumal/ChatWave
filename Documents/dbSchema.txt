@@ -1,0 +1,96 @@
+user table
+----------
+
+CREATE TABLE `user` (
+  `user_id` int NOT NULL AUTO_INCREMENT,
+  `email` varchar(45) NOT NULL,
+  `mobile_no` bigint NOT NULL,
+  `username` varchar(45) NOT NULL,
+  `first_name` varchar(45) DEFAULT NULL,
+  `last_name` varchar(45) DEFAULT NULL,
+  `verify_status` varchar(45) DEFAULT 'pending',
+  `user_status` varchar(45) DEFAULT NULL,
+  `bio` text,
+  `profile_photo` varchar(300) DEFAULT NULL,
+  `created_at` timestamp(6) NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `updated_at` timestamp(6) NULL DEFAULT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `email_UNIQUE` (`email`),
+  UNIQUE KEY `mobile_no_UNIQUE` (`mobile_no`),
+  UNIQUE KEY `username_UNIQUE` (`username`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+
+
+
+account table
+-------------
+CREATE TABLE `account_table` (
+  `account_id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int DEFAULT NULL,
+  `email` varchar(45) DEFAULT NULL,
+  `password` varchar(45) DEFAULT NULL,
+  `created_at` timestamp(6) NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `updated_at` timestamp(6) NULL DEFAULT NULL,
+  PRIMARY KEY (`account_id`),
+  UNIQUE KEY `email_UNIQUE` (`email`),
+  KEY `fk_user1_idx` (`user_id`),
+  CONSTRAINT `fk_user1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+
+
+
+Connection table
+----------------
+CREATE TABLE `connection_table` (
+  `con_id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int DEFAULT NULL,
+  `con_user_id` int DEFAULT NULL,
+  `con_req_status` varchar(45) DEFAULT 'pending',
+  `created_at` timestamp(6) NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `updated_at` timestamp(6) NULL DEFAULT NULL,
+  PRIMARY KEY (`con_id`),
+  KEY `fk_user2_idx` (`user_id`),
+  CONSTRAINT `fk_user2` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+
+
+
+
+
+Group table
+-----------
+
+CREATE TABLE `group_table` (
+  `group_id` int NOT NULL AUTO_INCREMENT,
+  `group_name` varchar(45) DEFAULT NULL,
+  `group_desc` text,
+  `group_admin_user_id` int DEFAULT NULL,
+  `created_at` timestamp(6) NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `updated_at` timestamp(6) NULL DEFAULT NULL,
+  `created_by` varchar(45) DEFAULT NULL,
+  `updated_by` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`group_id`),
+  KEY `fk_user4_idx` (`group_admin_user_id`),
+  CONSTRAINT `fk_user4` FOREIGN KEY (`group_admin_user_id`) REFERENCES `user` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+
+
+
+Group user table
+----------------
+CREATE TABLE `group_users_table` (
+  `group_id` int DEFAULT NULL,
+  `user_id` int DEFAULT NULL,
+  `user_role` varchar(45) DEFAULT 'member',
+  `user_group_status` varchar(45) DEFAULT NULL,
+  `joined_at` timestamp(6) NULL DEFAULT NULL,
+  `updated_at` timestamp(6) NULL DEFAULT NULL,
+  KEY `fk_group_idx` (`group_id`),
+  KEY `fk_user5_idx` (`user_id`),
+  CONSTRAINT `fk_group` FOREIGN KEY (`group_id`) REFERENCES `group_table` (`group_id`),
+  CONSTRAINT `fk_user5` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+
+
+
+
