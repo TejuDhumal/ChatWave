@@ -1,18 +1,27 @@
 package com.axis.chatwave.controller;
 
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.axis.chatwave.entity.Account;
 import com.axis.chatwave.entity.User;
 import com.axis.chatwave.entity.dto.UserDTO;
 import com.axis.chatwave.service.AccountService;
 import com.axis.chatwave.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.List;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/user")
@@ -31,7 +40,7 @@ public class UserController {
     }
 
     @PostMapping("/")
-    public ResponseEntity createUser(@RequestBody UserDTO userDTO) throws URISyntaxException {
+    public ResponseEntity createUser(@Valid @RequestBody UserDTO userDTO) throws URISyntaxException {
         // Create and save User without the password
         User user = new User();
         user.setUsername(userDTO.getUsername());
