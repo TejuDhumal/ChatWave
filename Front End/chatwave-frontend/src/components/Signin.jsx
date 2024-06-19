@@ -1,6 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+
+import { currentUser, login } from "../redux/Auth/Action";
+import SimpleSnackbar from "./SimpleSnackbar";
 import SigninImg from "../assets/images/signin-img.jpeg";
-import { Link, useNavigate } from "react-router-dom";
 
 const Signin = () => {
   const [formData, setFormData] = useState({
@@ -8,8 +12,18 @@ const Signin = () => {
     password: "",
   });
   const [errors, setErrors] = useState({});
+  const [open, setOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarType, setSnackbarType] = useState("error");
 
   const navigate = useNavigate();
+  const location = useLocation();
+  const dispatch = useDispatch();
+  const { auth } = useSelector((store) => store);
+
+  const token = localStorage.getItem("token");
+
+  console.log("auth", auth);
 
   const validateField = (name, value) => {
     let tempErrors = { ...errors };
@@ -36,7 +50,7 @@ const Signin = () => {
     validateField(name, value);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     let tempErrors = { ...errors };
     Object.keys(formData).forEach((key) => {
@@ -50,9 +64,36 @@ const Signin = () => {
 
     if (Object.values(tempErrors).every((x) => x === "")) {
       console.log(formData);
-      navigate('/dashboard');
+      const { success, message } = await dispatch(login(formData));
+      if (!success) {
+        setSnackbarMessage(message);
+        setSnackbarType("error");
+        setOpen(true);
+      }
     }
   };
+
+  const handleClose = () => setOpen(false);
+
+  //dispatch current user if user already signup
+  useEffect(() => {
+    if (token) dispatch(currentUser(token));
+  }, [token]);
+
+  //redirect to dashboard if login success
+  useEffect(() => {
+    if (auth.reqUser) {
+      navigate("/dashboard");
+    }
+  }, [auth.reqUser]);
+
+  useEffect(() => {
+    if (location.state?.snackbarMessage) {
+      setSnackbarMessage(location.state.snackbarMessage);
+      setSnackbarType(location.state.snackbarType || "success");
+      setOpen(true);
+    }
+  }, [location.state]);
 
   return (
     <div className="container max-w-[1280px] mx-auto px-4 md:px-10 bg-white pt-6 pb-16">
@@ -75,7 +116,9 @@ const Signin = () => {
                 </label>
                 <input
                   className={`appearance-none block w-full bg-blue-50 text-slate-600 rounded py-2 px-4 mb-3 leading-tight border-2 ${
-                    errors.email ? "border-red-500 focus:border-red-500" : "border-blue-200 focus:border-blue-400"
+                    errors.email
+                      ? "border-red-500 focus:border-red-500"
+                      : "border-blue-200 focus:border-blue-400"
                   } focus:outline-none focus:bg-blue-100`}
                   id="email"
                   type="email"
@@ -85,7 +128,9 @@ const Signin = () => {
                   onChange={handleChange}
                 />
                 {errors.email && (
-                  <p className="text-red-500 text-xs font-semibold italic">{errors.email}</p>
+                  <p className="text-red-500 text-xs font-semibold italic">
+                    {errors.email}
+                  </p>
                 )}
               </div>
               <div className="mb-4">
@@ -97,7 +142,9 @@ const Signin = () => {
                 </label>
                 <input
                   className={`appearance-none block w-full bg-blue-50 text-slate-600 rounded py-2 px-4 mb-3 leading-tight border-2 ${
-                    errors.password ? "border-red-500 focus:border-red-500" : "border-blue-200 focus:border-blue-400"
+                    errors.password
+                      ? "border-red-500 focus:border-red-500"
+                      : "border-blue-200 focus:border-blue-400"
                   } focus:outline-none focus:bg-blue-100`}
                   id="password"
                   type="password"
@@ -113,7 +160,11 @@ const Signin = () => {
                 )}
               </div>
               <div className="mb-6">
-                <Link to='/forgot-password' type="button" className="text-slate-500 underline hover:text-blue-600">
+                <Link
+                  to="/forgot-password"
+                  type="button"
+                  className="text-slate-500 underline hover:text-blue-600"
+                >
                   Forgot Password ?
                 </Link>
               </div>
@@ -128,6 +179,12 @@ const Signin = () => {
             </form>
           </div>
         </div>
+        <SimpleSnackbar
+          message={snackbarMessage}
+          open={open}
+          handleClose={handleClose}
+          type={snackbarType}
+        />
       </main>
     </div>
   );
