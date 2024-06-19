@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import SimpleSnackbar from "./SimpleSnackbar";
+import { forgotPassword, resetPassword } from "../redux/Auth/Action";
 
 const ForgotPassword = () => {
   const [formData, setFormData] = useState({
@@ -9,10 +12,13 @@ const ForgotPassword = () => {
     confirmNewPassword: "",
   });
   const [errors, setErrors] = useState({});
-  const [step, setStep] = useState(1); // 1: email, 2: otp, 3: new passwords
+  const [step, setStep] = useState(1); // 1: email, 2: otp, newpasswords
+  const [open, setOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarType, setSnackbarType] = useState("error");
 
   const navigate = useNavigate();
-
+  const dispatch = useDispatch();
   const validateField = (name, value) => {
     let tempErrors = { ...errors };
     if (name === "email") {
@@ -35,8 +41,12 @@ const ForgotPassword = () => {
         tempErrors.confirmNewPassword = "Confirm New Password is required.";
       }
     } else if (name === "confirmNewPassword") {
-      tempErrors.newPassword = formData.newPassword ? "" : "New Password is required.";
-      tempErrors.confirmNewPassword = value ? "" : "Confirm New Password is required.";
+      tempErrors.newPassword = formData.newPassword
+        ? ""
+        : "New Password is required.";
+      tempErrors.confirmNewPassword = value
+        ? ""
+        : "Confirm New Password is required.";
       if (formData.newPassword && value && value !== formData.newPassword) {
         tempErrors.confirmNewPassword = "Passwords do not match.";
       }
@@ -54,40 +64,61 @@ const ForgotPassword = () => {
     validateField(name, value);
   };
 
-  const handleSendOtp = (e) => {
+  const handleSendOtp = async (e) => {
     e.preventDefault();
     validateField("email", formData.email);
 
     if (!errors.email && formData.email) {
-      setStep(2);
+      const { success, message } = await dispatch(
+        forgotPassword({ email: formData.email })
+      );
+      setSnackbarMessage(message);
+      setSnackbarType(success ? "success" : "error");
+      setOpen(true);
+      console.log(success, message);
+      if (success) {
+        setStep(2);
+      }
     }
   };
 
-  const handleSubmitOtp = (e) => {
+  const handleSubmitOtp = async (e) => {
     e.preventDefault();
     validateField("otp", formData.otp);
-
-    if (!errors.otp && formData.otp) {
-      setStep(3);
-    }
-  };
-
-  const handleResetPassword = (e) => {
-    e.preventDefault();
     validateField("newPassword", formData.newPassword);
     validateField("confirmNewPassword", formData.confirmNewPassword);
-
     if (
+      !errors.otp &&
+      formData.otp &&
       !errors.newPassword &&
       !errors.confirmNewPassword &&
       formData.newPassword &&
       formData.confirmNewPassword
     ) {
-      console.log("Password has been reset successfully!");
-      navigate("/signin");
+      const { success, message } = await dispatch(
+        resetPassword({
+          email: formData.email,
+          otp: formData.otp,
+          newPassword: formData.newPassword,
+        })
+      );
+      setSnackbarMessage(message);
+      setSnackbarType(success ? "success" : "error");
+      setOpen(true);
+      if (success) {
+        console.log("successfully reset password");
+        navigate("/signin", {
+          state: {
+            snackbarMessage: "Reset Password successful",
+            snackbarType: "success",
+          },
+        });
+      }
     }
   };
-
+  const handleClose = () => {
+    setOpen(false);
+  };
   return (
     <div className="container max-w-[1280px] mx-auto px-4 md:px-10 bg-white pt-6 pb-16 min-h-[75vh]">
       <main>
@@ -172,16 +203,6 @@ const ForgotPassword = () => {
                     </p>
                   )}
                 </div>
-                <button
-                  className="bg-[#1271ff] hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                  type="submit"
-                >
-                  Submit OTP
-                </button>
-              </div>
-            )}
-            {step === 3 && (
-              <div className="text-center">
                 <div className="mb-4">
                   <label
                     className="block text-left uppercase tracking-wide text-slate-700 text-xs font-bold mb-2"
@@ -242,6 +263,12 @@ const ForgotPassword = () => {
             )}
           </form>
         </div>
+        <SimpleSnackbar
+          message={snackbarMessage}
+          open={open}
+          handleClose={handleClose}
+          type={snackbarType}
+        />
       </main>
     </div>
   );
