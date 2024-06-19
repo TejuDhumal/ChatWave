@@ -1,22 +1,34 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import { useDispatch, useSelector } from "react-redux";
+import SimpleSnackbar from "./SimpleSnackbar";
+import { currentUser, register, verifyOtp } from "../redux/Auth/Action";
 import SignupImg from "../assets/images/signup-img.jpg";
 
 const Signup = () => {
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
+    full_name: "",
     email: "",
     username: "",
     password: "",
     confirmPassword: "",
+    bio: "Available in Chatwave",
   });
   const [errors, setErrors] = useState({});
   const [step, setStep] = useState(1); // 1: signup, 2: otp
   const [otp, setOtp] = useState("");
+  const [open, setOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarType, setSnackbarType] = useState("error");
+
+  const dispatch = useDispatch();
+  const { auth } = useSelector((store) => store);
 
   const navigate = useNavigate();
+
+  const token = localStorage.getItem("token");
+
+  const handleClose = () => setOpen(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -36,9 +48,8 @@ const Signup = () => {
   const validateField = (name, value) => {
     let tempErrors = { ...errors };
     switch (name) {
-      case "firstName":
-      case "lastName":
-        tempErrors[name] = /^[A-Za-z]+$/.test(value)
+      case "full_name":
+        tempErrors[name] = /^[A-Za-z\s]+$/.test(value)
           ? ""
           : "Name must contain only characters.";
         break;
@@ -73,7 +84,19 @@ const Signup = () => {
     setErrors(tempErrors);
   };
 
-  const handleSubmit = (e) => {
+  //dispatch current user if user already signup
+  useEffect(() => {
+    if (token) dispatch(currentUser(token));
+  }, [auth.isAuth, token]);
+
+  //redirect to signin page if register success
+  useEffect(() => {
+    if (auth.reqUser) {
+      navigate("/signin");
+    }
+  }, [auth.reqUser]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     let tempErrors = { ...errors };
     Object.keys(formData).forEach((key) => {
@@ -87,20 +110,37 @@ const Signup = () => {
     setErrors(tempErrors);
 
     if (Object.values(tempErrors).every((x) => x === "")) {
-      setStep(2);
-      console.log("OTP sent to", formData.email);
+      const { message, success } = await dispatch(register(formData));
+      setSnackbarMessage(message);
+      setSnackbarType(success ? "success" : "error");
+      setOpen(true);
+      if (success) {
+        setStep(2);
+      }
     }
   };
 
-  const handleOtpSubmit = (e) => {
+  const handleOtpSubmit = async (e) => {
     e.preventDefault();
     if (otp.trim() === "") {
       setErrors({ otp: "OTP is required." });
       return;
     }
     if (!errors.otp) {
-      console.log("Signup complete");
-      navigate('/signin');
+      const { message, success } = await dispatch(
+        verifyOtp({ email: formData.email, otp })
+      );
+      setSnackbarMessage(message);
+      setSnackbarType(success ? "success" : "error");
+      setOpen(true);
+      if (success) {
+        navigate("/signin", {
+          state: {
+            snackbarMessage: "Email verified successfully",
+            snackbarType: "success",
+          },
+        });
+      }
     }
   };
 
@@ -121,61 +161,31 @@ const Signup = () => {
           <div className="w-[80%] sm:w-[60%] md:w-[50%]">
             {step === 1 ? (
               <form className="w-full md:w-[80%]" onSubmit={handleSubmit}>
-                <div className="mb-3">
-                  <div className="flex flex-col md:flex-row justify-between items-center space-x-0 md:space-x-2">
-                    <div className="w-full">
-                      <label
-                        className="block uppercase tracking-wide text-slate-700 text-xs font-bold mb-2"
-                        htmlFor="firstName"
-                      >
-                        First Name
-                      </label>
-                      <input
-                        className={`appearance-none block w-full bg-blue-50 text-slate-600 outline-none rounded py-2 px-4 mb-3 leading-tight border-2 ${
-                          errors.firstName
-                            ? "border-red-500 focus:border-red-500"
-                            : "border-blue-200 focus:border-blue-400"
-                        }`}
-                        id="firstName"
-                        type="text"
-                        placeholder="Enter your First Name..."
-                        name="firstName"
-                        value={formData.firstName}
-                        onChange={handleChange}
-                      />
-                      {errors.firstName && (
-                        <p className="text-red-500 font-semibold text-xs italic">
-                          {errors.firstName}
-                        </p>
-                      )}
-                    </div>
-                    <div className="w-full">
-                      <label
-                        className="block uppercase tracking-wide text-slate-700 text-xs font-bold mb-2"
-                        htmlFor="lastName"
-                      >
-                        Last Name
-                      </label>
-                      <input
-                        className={`appearance-none block w-full bg-blue-50 text-slate-600 outline-none rounded py-2 px-4 mb-3 leading-tight border-2 ${
-                          errors.lastName
-                            ? "border-red-500 focus:border-red-500"
-                            : "border-blue-200 focus:border-blue-400"
-                        }`}
-                        id="lastName"
-                        type="text"
-                        placeholder="Enter your Last Name..."
-                        name="lastName"
-                        value={formData.lastName}
-                        onChange={handleChange}
-                      />
-                      {errors.lastName && (
-                        <p className="text-red-500 font-semibold text-xs italic">
-                          {errors.lastName}
-                        </p>
-                      )}
-                    </div>
-                  </div>
+                <div className="mb-6">
+                  <label
+                    className="block uppercase tracking-wide text-slate-700 text-xs font-bold mb-2"
+                    htmlFor="full_name"
+                  >
+                    Full Name
+                  </label>
+                  <input
+                    className={`appearance-none block w-full bg-blue-50 text-slate-600 outline-none rounded py-2 px-4 mb-3 leading-tight border-2 ${
+                      errors.full_name
+                        ? "border-red-500 focus:border-red-500"
+                        : "border-blue-200 focus:border-blue-400"
+                    }`}
+                    id="full_name"
+                    type="text"
+                    placeholder="Enter your First Name..."
+                    name="full_name"
+                    value={formData.full_name}
+                    onChange={handleChange}
+                  />
+                  {errors.full_name && (
+                    <p className="text-red-500 font-semibold text-xs italic">
+                      {errors.full_name}
+                    </p>
+                  )}
                 </div>
                 <div className="mb-6">
                   <label
@@ -292,8 +302,15 @@ const Signup = () => {
               </form>
             ) : (
               <form className="w-full md:w-[80%]" onSubmit={handleOtpSubmit}>
-                <h2 className="text-center text-2xl text-[#1271ff] font-semibold pb-4">Email Verification</h2>
-                <p className="text-center text-slate-600">Enter OTP Sent to <span className="text-slate-700 hover:text-blue-600">{formData.email}</span></p>
+                <h2 className="text-center text-2xl text-[#1271ff] font-semibold pb-4">
+                  Email Verification
+                </h2>
+                <p className="text-center text-slate-600">
+                  Enter OTP Sent to{" "}
+                  <span className="text-slate-700 hover:text-blue-600">
+                    {formData.email}
+                  </span>
+                </p>
                 <div className="mb-6">
                   <label
                     className="block uppercase tracking-wide text-slate-700 text-xs font-bold mb-2"
@@ -325,13 +342,19 @@ const Signup = () => {
                     className="flex justify-center items-center space-x-2 bg-[#1271ff] hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                     type="submit"
                   >
-                    <span>Submit OTP</span>
+                    <span>Verify</span>
                   </button>
                 </div>
               </form>
             )}
           </div>
         </div>
+        <SimpleSnackbar
+          message={snackbarMessage}
+          open={open}
+          handleClose={handleClose}
+          type={snackbarType}
+        />
       </main>
     </div>
   );
