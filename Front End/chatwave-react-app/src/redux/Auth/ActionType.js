@@ -1,0 +1,10 @@
+export const REGISTER = "REGISTER";
+export const LOGIN = "LOGIN";
+export const REQ_USER = "REQ_USER";
+export const SEARCH_USER = "SEARCH_USER";
+export const UPDATE_USER = "UPDATE_USER";
+export const VERIFY_OTP = "VERIFY_OTP";
+export const FORGOT_PASSWORD = "FORGOT_PASSWORD";
+export const RESET_PASSWORD = "RESET_PASSWORD";
+export const DEACTIVATE_ACCOUNT = "DEACTIVATE_ACCOUNT";
+export const REACTIVATE_ACCOUNT = "REACTIVATE_ACCOUNT";
