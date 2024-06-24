@@ -1,0 +1,6 @@
+projectKey=com.axis.team4.codecrafters:cw-chat-notification-service
+serverUrl=http://localhost:9000
+serverVersion=10.5.1.90531
+dashboardUrl=http://localhost:9000/dashboard?id=com.axis.team4.codecrafters%3Acw-chat-notification-service
+ceTaskId=f0dca855-bdaa-4e7a-ba66-752884de0ddb
+ceTaskUrl=http://localhost:9000/api/ce/task?id=f0dca855-bdaa-4e7a-ba66-752884de0ddb
