@@ -1,0 +1,4 @@
+com\axis\team4\codecrafters\notification_service\model\NotificationRequestTest.class
+com\axis\team4\codecrafters\notification_service\CwChatNotificationServiceApplicationTests.class
+com\axis\team4\codecrafters\notification_service\config\RabbitMQConfigTest.class
+com\axis\team4\codecrafters\notification_service\controller\NotificationControllerTest.class

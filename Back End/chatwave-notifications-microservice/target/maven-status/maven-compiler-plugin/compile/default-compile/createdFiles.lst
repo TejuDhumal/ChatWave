@@ -1,0 +1,4 @@
+com\axis\team4\codecrafters\notification_service\model\NotificationRequest.class
+com\axis\team4\codecrafters\notification_service\config\RabbitMQConfig.class
+com\axis\team4\codecrafters\notification_service\controller\NotificationController.class
+com\axis\team4\codecrafters\notification_service\NotificationServiceApplication.class
