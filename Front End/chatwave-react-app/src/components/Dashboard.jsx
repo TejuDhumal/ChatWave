@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import { AiOutlineSearch } from "react-icons/ai";
-import { MdOutlineGroupAdd, MdOutlineVideoCall } from "react-icons/md";
+import { MdOutlineGroupAdd } from "react-icons/md";
+import { AiOutlineVideoCameraAdd } from "react-icons/ai";
 import { HiOutlineGif } from "react-icons/hi2";
-import { IoMdSend, IoMdPower, IoMdArrowBack } from "react-icons/io";
+import { IoMdSend, IoMdArrowBack } from "react-icons/io";
+import { TbLogout } from "react-icons/tb";
+import { VscRobot } from "react-icons/vsc";
 import {
   BsArrowLeft,
   BsEmojiSmile,
@@ -56,7 +59,7 @@ import SimpleSnackbar from "./SimpleSnackbar";
 import GiphySearch from "./GiphySearch";
 import SelectedMember from "./SelectedMember";
 import "./Dashboard.css";
-import Logo from "../assets/images/logo.png";
+import Logo from "/public/logo.png";
 import { BASE_URL } from "../config/Api";
 import axios from "axios";
 import io from "socket.io-client";
@@ -98,7 +101,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { auth, chat, message } = useSelector((store) => store);
-
+  const [showChatBubble, setShowChatBubble] = useState(false);
   const token = localStorage.getItem("token");
   const socket = useRef();
 
@@ -692,6 +695,31 @@ const Dashboard = () => {
   const popOpen = Boolean(anchorEl);
   const id = popOpen ? "simple-popover" : undefined;
 
+  useEffect(() => {
+    if (showChatBubble) {
+      const script1 = document.createElement("script");
+      script1.innerHTML = `
+        window.embeddedChatbotConfig = {
+          chatbotId: "mxDBEDjLAyTOXgc2uQWqC",
+          domain: "www.chatbase.co"
+        }
+      `;
+      document.body.appendChild(script1);
+
+      const script2 = document.createElement("script");
+      script2.src = "https://www.chatbase.co/embed.min.js";
+      script2.setAttribute("chatbotId", "mxDBEDjLAyTOXgc2uQWqC");
+      script2.setAttribute("domain", "www.chatbase.co");
+      script2.defer = true;
+      document.body.appendChild(script2);
+
+      return () => {
+        document.body.removeChild(script1);
+        document.body.removeChild(script2);
+      };
+    }
+  }, [showChatBubble]);
+
   return (
     <div className="relative h-[100vh]">
       <div className="py-14 bg-[#1271ff] w-full"></div>
@@ -738,7 +766,15 @@ const Dashboard = () => {
                       onClick={() => navigate("/group-room")}
                       className="cursor-pointer text-2xl"
                     >
-                      <MdOutlineVideoCall />
+                      <AiOutlineVideoCameraAdd />
+                    </div>
+                  </Tooltip>
+                  <Tooltip title="Toggle Chatbot" placement="bottom">
+                    <div
+                      onClick={() => setShowChatBubble(!showChatBubble)}
+                      className="cursor-pointer"
+                    >
+                      <VscRobot />
                     </div>
                   </Tooltip>
                   <Tooltip title="Create Group" placement="bottom">
@@ -751,7 +787,7 @@ const Dashboard = () => {
                   </Tooltip>
                   <Tooltip title="Logout" placement="bottom">
                     <div className="cursor-pointer text-red-600">
-                      <IoMdPower onClick={handleLogout} />
+                      <TbLogout onClick={handleLogout} />
                     </div>
                   </Tooltip>
                 </div>
@@ -892,6 +928,7 @@ const Dashboard = () => {
                       />
                     </div>
                   </Tooltip>
+
                   <img
                     className="w-10 h-10 rounded-full"
                     src={
