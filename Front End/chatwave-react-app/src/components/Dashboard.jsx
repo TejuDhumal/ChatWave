@@ -224,7 +224,7 @@ const Dashboard = () => {
   }, [currentChat]);
 
   const sendMessage = (message) => {
-    console.log("Sending message:", message);
+    //console.log("Sending message:", message);
     socket.current.emit("new message", message);
   };
 
@@ -234,7 +234,7 @@ const Dashboard = () => {
       socket.current.emit("join chat", currentChat.id);
 
       socket.current.on("message received", (newMessage) => {
-        console.log("Message received:", newMessage);
+        //console.log("Message received:", newMessage);
         if (newMessage.chat.id === currentChat.id) {
           setMessages((prevMessages) => [...prevMessages, newMessage]);
         }
@@ -477,7 +477,7 @@ const Dashboard = () => {
       setSnackbarMessage("File size should not exceed 20 MB limit!");
       setShowSnackbar(true);
     } else {
-      console.log("Files selected:", files);
+      //console.log("Files selected:", files);
       const uploadedFiles = [];
 
       for (const file of files) {
@@ -492,7 +492,7 @@ const Dashboard = () => {
             formData
           );
           const contentUrl = response.data.secure_url;
-          console.log("contenturl", contentUrl);
+          //console.log("contenturl", contentUrl);
           const data2 = {
             token,
             chatId: currentChat?.id,
@@ -510,7 +510,7 @@ const Dashboard = () => {
             isAttachment: true,
           });
         } catch (error) {
-          console.error("Error uploading attachment: ", error);
+          //console.error("Error uploading attachment: ", error);
         }
       }
 
@@ -563,7 +563,7 @@ const Dashboard = () => {
       const imageUrl = response.data.secure_url;
       setSnackbarMessage("Group image updated successfully");
       setOpen(true);
-      console.log("imgurl", imageUrl);
+      //console.log("imgurl", imageUrl);
       const newData = {
         currentChatId: currentChat.id,
         token: localStorage.getItem("token"),
