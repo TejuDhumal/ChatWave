@@ -78,7 +78,7 @@ const ForgotPassword = () => {
       const { success, message } = await dispatch(
         forgotPassword({ email: formData.email })
       );
-      setSnackbarMessage(message);
+      setSnackbarMessage(success ? "OTP Sent Successfully!" : "Waver not found!");
       setSnackbarType(success ? "success" : "error");
       setOpen(true);
       console.log(success, message);
