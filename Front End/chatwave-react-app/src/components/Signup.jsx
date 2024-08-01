@@ -65,12 +65,15 @@ const Signup = () => {
         break;
       case "password":
         tempErrors.password =
-          value.length >= 8
+          /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(
+            value
+          )
             ? ""
-            : "Password must be at least 8 characters long.";
+            : "Password must be at least 8 characters long, include at least one uppercase, one lowercase, one number, and one special character.";
         tempErrors.confirmPassword =
           value === formData.confirmPassword ? "" : "Passwords do not match.";
         break;
+
       case "confirmPassword":
         tempErrors.confirmPassword =
           value === formData.password ? "" : "Passwords do not match.";
